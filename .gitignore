@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# 数据文件（可选排除，接收者运行后会自动生成）
+data/douyin.db
+data/records/
+
+# 日志
+*.log
+
+# 敏感信息（如果你填了 Cookie，确保不要提交）
+# backend/config.py  # ⚠️ 如果填了真实 Cookie，取消这行注释
