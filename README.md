@@ -2,7 +2,7 @@
 
 实时监控抖音热门搜索榜单，分析热点趋势的现代化仪表盘。
 
-## 🚀 傻瓜式启动（推荐）
+## 🚀 一键启动（推荐）
 
 ### Windows 用户
 1. 确保已安装 [Python](https://www.python.org/downloads/)（安装时勾选 "Add to PATH"）
