@@ -350,17 +350,14 @@ async function updateChart() {
         }
     }
 
-    const sortedTimes = Array.from(allDates).sort((a, b) => a - b);
-    const timeLabels = sortedTimes.map(t => formatDate(t));
-
     compareWords.forEach((word, idx) => {
         const rawData = dataMap[word] || [];
-        const timeToHot = {};
-        rawData.forEach(d => {
-            timeToHot[new Date(d.time || d.timestamp).getTime()] = d.hot_value;
-        });
 
-        const plotData = sortedTimes.map(t => timeToHot[t] || null);
+        // 使用 [timestamp, value] 格式，适配 time 类型 xAxis
+        const plotData = rawData.map(d => {
+            const timestamp = new Date(d.time || d.timestamp).getTime();
+            return [timestamp, d.hot_value];
+        });
 
         seriesData.push({
             name: word,
@@ -375,23 +372,40 @@ async function updateChart() {
         });
     });
 
-    renderEChart(timeLabels, seriesData);
+    renderEChart(seriesData);
 }
 
-function renderEChart(labels, series) {
+function renderEChart(series) {
     if (!mainChart) mainChart = echarts.init(els.mainChart);
 
     // 清除旧图表状态
     mainChart.clear();
 
+    // 计算时间范围
+    const now = Date.now();
+    const minTime = now - (selectedHours * 60 * 60 * 1000);
+
     const option = {
         backgroundColor: 'transparent',
-        grid: { top: 30, right: 20, bottom: 50, left: 10, containLabel: true },
+        grid: { top: 30, right: 20, bottom: 30, left: 10, containLabel: true },
         tooltip: {
             trigger: 'axis',
             backgroundColor: 'rgba(24, 24, 27, 0.9)',
             borderColor: '#3f3f46',
-            textStyle: { color: '#fafafa' }
+            textStyle: { color: '#fafafa' },
+            formatter: function (params) {
+                if (!params || params.length === 0) return '';
+                const time = new Date(params[0].value[0]);
+                const timeStr = `${time.getMonth() + 1}/${time.getDate()} ${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}`;
+                let html = `<div style="font-weight:bold;margin-bottom:8px">${timeStr}</div>`;
+                params.forEach(p => {
+                    html += `<div style="display:flex;justify-content:space-between;gap:20px">
+                        <span>${p.marker} ${p.seriesName}</span>
+                        <span style="font-weight:bold">${compactNumber(p.value[1])}</span>
+                    </div>`;
+                });
+                return html;
+            }
         },
         legend: {
             data: series.map(s => s.name),
@@ -400,53 +414,27 @@ function renderEChart(labels, series) {
             top: 0
         },
         xAxis: {
-            type: 'category',
-            data: labels,
+            type: 'time',
+            min: minTime,
+            max: now,
             axisLine: { lineStyle: { color: '#3f3f46' } },
-            axisLabel: { color: '#71717a', fontSize: 10 },
-            axisTick: { show: false }
+            axisLabel: {
+                color: '#71717a',
+                fontSize: 10,
+                formatter: function (value) {
+                    const d = new Date(value);
+                    return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+                }
+            },
+            axisTick: { show: false },
+            splitLine: { show: false }
         },
         yAxis: {
             type: 'value',
             splitLine: { lineStyle: { color: '#27272a' } },
             axisLabel: { color: '#71717a', formatter: compactNumber }
         },
-        series: series,
-        dataZoom: [
-            {
-                type: 'inside',
-                start: 0,
-                end: 100,
-                zoomLock: true,  // 锁定缩放，只允许平移
-                moveOnMouseMove: true,
-                moveOnMouseWheel: true,
-                preventDefaultMouseMove: false
-            },
-            {
-                type: 'slider',
-                show: true,
-                height: 20,
-                bottom: 10,
-                start: 0,
-                end: 100,
-                zoomLock: true,  // 锁定缩放，只允许平移
-                brushSelect: false,  // 禁用框选缩放
-                handleSize: '100%',
-                handleStyle: { color: '#6366f1', borderColor: '#6366f1' },
-                textStyle: { color: '#71717a' },
-                borderColor: 'transparent',
-                backgroundColor: '#18181b',
-                fillerColor: 'rgba(99, 102, 241, 0.3)',
-                dataBackground: {
-                    lineStyle: { color: '#3f3f46' },
-                    areaStyle: { color: '#27272a' }
-                },
-                selectedDataBackground: {
-                    lineStyle: { color: '#6366f1' },
-                    areaStyle: { color: 'rgba(99, 102, 241, 0.1)' }
-                }
-            }
-        ]
+        series: series
     };
     mainChart.setOption(option);
 }
