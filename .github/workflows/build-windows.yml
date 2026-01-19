@@ -32,7 +32,7 @@ jobs:
     
     - name: Build EXE with PyInstaller
       run: |
-        pyinstaller --noconfirm --onedir --console --name "DouyinMonitor" --add-data "frontend;frontend" --add-data "backend;backend" --add-data "data;data" --hidden-import "flask" --hidden-import "flask_cors" --hidden-import "apscheduler" --hidden-import "apscheduler.schedulers.background" --hidden-import "apscheduler.triggers.interval" --hidden-import "requests" --hidden-import "bs4" --hidden-import "lxml" --collect-submodules "backend" run.py
+        pyinstaller --noconfirm --onedir --console --name "DouyinMonitor" --add-data "frontend;frontend" --add-data "backend;backend" --add-data "data;data" --hidden-import "flask" --hidden-import "flask_cors" --hidden-import "apscheduler" --hidden-import "apscheduler.schedulers.background" --hidden-import "apscheduler.triggers.interval" --hidden-import "apscheduler.triggers.cron" --hidden-import "apscheduler.triggers.date" --hidden-import "apscheduler.executors.pool" --hidden-import "apscheduler.executors.base" --hidden-import "apscheduler.jobstores.memory" --hidden-import "apscheduler.jobstores.base" --hidden-import "requests" --hidden-import "bs4" --hidden-import "lxml" --hidden-import "sqlite3" --hidden-import "json" --hidden-import "threading" --hidden-import "webbrowser" --collect-submodules "backend" --collect-submodules "apscheduler" run.py
     
     - name: Create launcher script
       shell: cmd
@@ -40,7 +40,18 @@ jobs:
         echo @echo off > "dist\DouyinMonitor\Start.bat"
         echo chcp 65001 ^>nul >> "dist\DouyinMonitor\Start.bat"
         echo cd /d "%%~dp0" >> "dist\DouyinMonitor\Start.bat"
-        echo start "" "DouyinMonitor.exe" >> "dist\DouyinMonitor\Start.bat"
+        echo echo ========================================== >> "dist\DouyinMonitor\Start.bat"
+        echo echo    Douyin Monitor Starting... >> "dist\DouyinMonitor\Start.bat"
+        echo echo ========================================== >> "dist\DouyinMonitor\Start.bat"
+        echo echo. >> "dist\DouyinMonitor\Start.bat"
+        echo "DouyinMonitor.exe" >> "dist\DouyinMonitor\Start.bat"
+        echo if errorlevel 1 ( >> "dist\DouyinMonitor\Start.bat"
+        echo     echo. >> "dist\DouyinMonitor\Start.bat"
+        echo     echo ========================================== >> "dist\DouyinMonitor\Start.bat"
+        echo     echo    Program exited with error! >> "dist\DouyinMonitor\Start.bat"
+        echo     echo ========================================== >> "dist\DouyinMonitor\Start.bat"
+        echo     pause >> "dist\DouyinMonitor\Start.bat"
+        echo ) >> "dist\DouyinMonitor\Start.bat"
     
     - name: Compress release
       shell: pwsh

@@ -6,11 +6,23 @@
 """
 
 import os
+import sys
 
 # ============================================================
-# 基础路径配置
+# 基础路径配置 (兼容 PyInstaller 打包)
 # ============================================================
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+def get_base_dir():
+    """获取基础路径，兼容 PyInstaller 打包后的情况"""
+    if getattr(sys, 'frozen', False):
+        # PyInstaller 打包后运行
+        # sys._MEIPASS 是临时解压目录（用于 --onefile）
+        # 对于 --onedir，使用 exe 所在目录
+        return os.path.dirname(sys.executable)
+    else:
+        # 普通 Python 运行
+        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+BASE_DIR = get_base_dir()
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 
 # 数据库配置
