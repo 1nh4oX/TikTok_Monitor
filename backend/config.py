@@ -15,8 +15,10 @@ def get_base_dir():
     """获取基础路径，兼容 PyInstaller 打包后的情况"""
     if getattr(sys, 'frozen', False):
         # PyInstaller 打包后运行
-        # sys._MEIPASS 是临时解压目录（用于 --onefile）
-        # 对于 --onedir，使用 exe 所在目录
+        # sys._MEIPASS 指向资源文件所在目录（_internal 目录）
+        if hasattr(sys, '_MEIPASS'):
+            return sys._MEIPASS
+        # 备用方案：使用 exe 所在目录
         return os.path.dirname(sys.executable)
     else:
         # 普通 Python 运行
