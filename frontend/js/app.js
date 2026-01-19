@@ -372,9 +372,12 @@ async function updateChart() {
 function renderEChart(labels, series) {
     if (!mainChart) mainChart = echarts.init(els.mainChart);
 
+    // 清除旧图表状态
+    mainChart.clear();
+
     const option = {
         backgroundColor: 'transparent',
-        grid: { top: 30, right: 20, bottom: 20, left: 10, containLabel: true },
+        grid: { top: 30, right: 20, bottom: 50, left: 10, containLabel: true },
         tooltip: {
             trigger: 'axis',
             backgroundColor: 'rgba(24, 24, 27, 0.9)',
@@ -405,24 +408,33 @@ function renderEChart(labels, series) {
                 type: 'inside',
                 start: 0,
                 end: 100,
-                zoomLock: false
+                zoomLock: true,  // 锁定缩放，只允许平移
+                moveOnMouseMove: true,
+                moveOnMouseWheel: true,
+                preventDefaultMouseMove: false
             },
             {
                 type: 'slider',
                 show: true,
                 height: 20,
-                bottom: 0,
+                bottom: 10,
                 start: 0,
                 end: 100,
-                handleSize: '80%',
-                handleStyle: { color: '#6366f1' },
+                zoomLock: true,  // 锁定缩放，只允许平移
+                brushSelect: false,  // 禁用框选缩放
+                handleSize: '100%',
+                handleStyle: { color: '#6366f1', borderColor: '#6366f1' },
                 textStyle: { color: '#71717a' },
                 borderColor: 'transparent',
                 backgroundColor: '#18181b',
-                fillerColor: 'rgba(99, 102, 241, 0.2)',
+                fillerColor: 'rgba(99, 102, 241, 0.3)',
                 dataBackground: {
                     lineStyle: { color: '#3f3f46' },
                     areaStyle: { color: '#27272a' }
+                },
+                selectedDataBackground: {
+                    lineStyle: { color: '#6366f1' },
+                    areaStyle: { color: 'rgba(99, 102, 241, 0.1)' }
                 }
             }
         ]
