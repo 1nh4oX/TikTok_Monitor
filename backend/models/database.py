@@ -195,48 +195,25 @@ def get_rising_topics(limit: int = 10) -> List[Dict]:
     """
     获取上升最快的热点话题
     
-    比较最新快照与约 30 分钟前的快照（如果不存在则使用上一条）
+    比较最新快照与上一个快照，找出排名上升的词条
     """
     with get_db_connection() as conn:
         cursor = conn.cursor()
         
-        # 1. 获取最新快照
+        # 1. 获取最新的两个快照
         cursor.execute('''
             SELECT id, captured_at FROM hot_snapshots
             ORDER BY captured_at DESC
-            LIMIT 1
+            LIMIT 2
         ''')
-        latest = cursor.fetchone()
+        snapshots = cursor.fetchall()
         
-        if not latest:
+        if len(snapshots) < 2:
+            # 快照不足，无法对比
             return []
         
-        latest_id = latest['id']
-        latest_time = latest['captured_at']
-        
-        # 2. 寻找对比快照 (约 30 分钟前)
-        cursor.execute('''
-            SELECT id FROM hot_snapshots 
-            WHERE captured_at <= datetime(?, '-30 minutes')
-            ORDER BY captured_at DESC 
-            LIMIT 1
-        ''', (latest_time,))
-        prev = cursor.fetchone()
-        
-        # 3. 如果没有 30 分钟前的，尝试找上一条不同的快照
-        if not prev:
-            cursor.execute('''
-                SELECT id FROM hot_snapshots 
-                WHERE id < ?
-                ORDER BY id DESC
-                LIMIT 1
-            ''', (latest_id,))
-            prev = cursor.fetchone()
-            
-        if not prev:
-            return []
-            
-        prev_id = prev['id']
+        latest_id = snapshots[0]['id']
+        prev_id = snapshots[1]['id']
         
         # 4. 比较排名变化
         cursor.execute('''
