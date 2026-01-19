@@ -327,10 +327,19 @@ async function updateChart() {
             if (j1.success && j1.trend.length > 0) {
                 data = j1.trend;
             } else {
-                const r2 = await fetch(`${API_BASE}/api/history/${encodeURIComponent(word)}`);
+                // 将小时转换为天数（至少1天）
+                const days = Math.max(1, Math.ceil(selectedHours / 24));
+                const r2 = await fetch(`${API_BASE}/api/history/${encodeURIComponent(word)}?days=${days}`);
                 const j2 = await r2.json();
                 if (j2.success) data = j2.history;
             }
+
+            // 前端过滤：确保只显示选定时间范围内的数据
+            const cutoffTime = Date.now() - (selectedHours * 60 * 60 * 1000);
+            data = data.filter(d => {
+                const itemTime = new Date(d.time || d.timestamp).getTime();
+                return itemTime >= cutoffTime;
+            });
 
             if (data.length > 0) {
                 dataMap[word] = data;

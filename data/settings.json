@@ -1,6 +1,6 @@
 {
-  "scrape_interval_minutes": 10,
-  "max_history_days": 7,
+  "scrape_interval_minutes": 1,
+  "max_history_days": 1,
   "auto_refresh_seconds": 60,
   "theme": "dark",
   "show_trending_list": true,
