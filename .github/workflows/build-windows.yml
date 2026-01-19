@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
     tags:
       - 'v*'
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -28,44 +28,21 @@ jobs:
         pip install pyinstaller
     
     - name: Build EXE with PyInstaller
-      shell: pwsh
       run: |
-        pyinstaller --noconfirm --onedir --console `
-          --name "DouyinMonitor" `
-          --add-data "frontend;frontend" `
-          --add-data "backend;backend" `
-          --add-data "data;data" `
-          --hidden-import "flask" `
-          --hidden-import "flask_cors" `
-          --hidden-import "apscheduler" `
-          --hidden-import "apscheduler.schedulers.background" `
-          --hidden-import "apscheduler.triggers.interval" `
-          --hidden-import "requests" `
-          --hidden-import "bs4" `
-          --hidden-import "lxml" `
-          --collect-submodules "backend" `
-          run.py
+        pyinstaller --noconfirm --onedir --console --name "DouyinMonitor" --add-data "frontend;frontend" --add-data "backend;backend" --add-data "data;data" --hidden-import "flask" --hidden-import "flask_cors" --hidden-import "apscheduler" --hidden-import "apscheduler.schedulers.background" --hidden-import "apscheduler.triggers.interval" --hidden-import "requests" --hidden-import "bs4" --hidden-import "lxml" --collect-submodules "backend" run.py
     
     - name: Create launcher script
-      shell: pwsh
+      shell: cmd
       run: |
-        $content = @"
-@echo off
-chcp 65001 >nul
-cd /d "%~dp0"
-start "" "DouyinMonitor.exe"
-"@
-        $content | Out-File -FilePath "dist/DouyinMonitor/启动.bat" -Encoding utf8
-    
-    - name: Rename folder for release
-      shell: pwsh
-      run: |
-        Rename-Item -Path "dist/DouyinMonitor" -NewName "抖音热搜监控"
+        echo @echo off > "dist\DouyinMonitor\Start.bat"
+        echo chcp 65001 ^>nul >> "dist\DouyinMonitor\Start.bat"
+        echo cd /d "%%~dp0" >> "dist\DouyinMonitor\Start.bat"
+        echo start "" "DouyinMonitor.exe" >> "dist\DouyinMonitor\Start.bat"
     
     - name: Compress release
       shell: pwsh
       run: |
-        Compress-Archive -Path "dist/抖音热搜监控" -DestinationPath "DouyinMonitor-Windows.zip" -Force
+        Compress-Archive -Path "dist/DouyinMonitor" -DestinationPath "DouyinMonitor-Windows.zip" -Force
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
