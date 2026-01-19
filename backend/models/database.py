@@ -195,7 +195,7 @@ def get_rising_topics(limit: int = 10) -> List[Dict]:
     """
     获取上升最快的热点话题
     
-    比较最新快照与上一个快照，找出排名上升的词条
+    优先显示排名上升的词条，如果没有则显示热度值增长最多的词条
     """
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -209,13 +209,29 @@ def get_rising_topics(limit: int = 10) -> List[Dict]:
         snapshots = cursor.fetchall()
         
         if len(snapshots) < 2:
-            # 快照不足，无法对比
-            return []
+            # 快照不足，显示当前热榜前10
+            cursor.execute('''
+                SELECT word, position, hot_value, url FROM hot_items
+                WHERE snapshot_id = (SELECT id FROM hot_snapshots ORDER BY captured_at DESC LIMIT 1)
+                ORDER BY position
+                LIMIT ?
+            ''', (limit,))
+            result = []
+            for row in cursor.fetchall():
+                result.append({
+                    'word': row['word'],
+                    'current_position': row['position'],
+                    'hot_value': row['hot_value'],
+                    'previous_position': None,
+                    'rank_change': 'TOP',
+                    'url': row['url']
+                })
+            return result
         
         latest_id = snapshots[0]['id']
         prev_id = snapshots[1]['id']
         
-        # 4. 比较排名变化
+        # 2. 先尝试找排名上升的
         cursor.execute('''
             SELECT 
                 curr.word,
@@ -244,6 +260,36 @@ def get_rising_topics(limit: int = 10) -> List[Dict]:
                 'rank_change': row['rank_change'] if row['rank_change'] else 'NEW',
                 'url': row['url']
             })
+        
+        # 3. 如果没有排名上升的，显示热度增长最多的
+        if len(rising) == 0:
+            cursor.execute('''
+                SELECT 
+                    curr.word,
+                    curr.position as curr_pos,
+                    curr.hot_value as curr_value,
+                    prev.hot_value as prev_value,
+                    (curr.hot_value - COALESCE(prev.hot_value, 0)) as hot_change,
+                    curr.url
+                FROM hot_items curr
+                LEFT JOIN hot_items prev ON curr.word = prev.word AND prev.snapshot_id = ?
+                WHERE curr.snapshot_id = ?
+                ORDER BY hot_change DESC
+                LIMIT ?
+            ''', (prev_id, latest_id, limit))
+            
+            for row in cursor.fetchall():
+                hot_change = row['hot_change'] or 0
+                # 只显示热度有正增长的
+                if hot_change > 0:
+                    rising.append({
+                        'word': row['word'],
+                        'current_position': row['curr_pos'],
+                        'hot_value': row['curr_value'],
+                        'previous_position': row['curr_pos'],  # 排名相同
+                        'rank_change': f'+{hot_change // 10000}w' if hot_change >= 10000 else f'+{hot_change}',
+                        'url': row['url']
+                    })
         
         return rising
 
