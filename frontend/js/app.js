@@ -381,13 +381,29 @@ function renderEChart(series) {
     // 清除旧图表状态
     mainChart.clear();
 
-    // 计算时间范围
-    const now = Date.now();
-    const minTime = now - (selectedHours * 60 * 60 * 1000);
+    // 从数据中计算实际时间范围
+    let dataMinTime = Infinity;
+    let dataMaxTime = -Infinity;
+    series.forEach(s => {
+        s.data.forEach(d => {
+            if (d[0] < dataMinTime) dataMinTime = d[0];
+            if (d[0] > dataMaxTime) dataMaxTime = d[0];
+        });
+    });
+
+    // 如果没有数据，使用默认范围
+    if (dataMinTime === Infinity) {
+        const now = Date.now();
+        dataMinTime = now - (selectedHours * 60 * 60 * 1000);
+        dataMaxTime = now;
+    }
+
+    // 计算时间跨度（小时）
+    const timeSpanHours = (dataMaxTime - dataMinTime) / (1000 * 60 * 60);
 
     const option = {
         backgroundColor: 'transparent',
-        grid: { top: 30, right: 20, bottom: 30, left: 10, containLabel: true },
+        grid: { top: 30, right: 20, bottom: 60, left: 10, containLabel: true },
         tooltip: {
             trigger: 'axis',
             backgroundColor: 'rgba(24, 24, 27, 0.9)',
@@ -415,15 +431,20 @@ function renderEChart(series) {
         },
         xAxis: {
             type: 'time',
-            min: minTime,
-            max: now,
             axisLine: { lineStyle: { color: '#3f3f46' } },
             axisLabel: {
                 color: '#71717a',
                 fontSize: 10,
                 formatter: function (value) {
                     const d = new Date(value);
-                    return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    // 根据时间跨度决定显示格式
+                    if (timeSpanHours > 24) {
+                        // 超过一天显示日期+时间
+                        return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    } else {
+                        // 同一天只显示时间
+                        return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    }
                 }
             },
             axisTick: { show: false },
@@ -434,7 +455,37 @@ function renderEChart(series) {
             splitLine: { lineStyle: { color: '#27272a' } },
             axisLabel: { color: '#71717a', formatter: compactNumber }
         },
-        series: series
+        series: series,
+        dataZoom: [
+            {
+                type: 'inside',
+                start: 0,
+                end: 100,
+                zoomLock: true,
+                moveOnMouseMove: true,
+                moveOnMouseWheel: true
+            },
+            {
+                type: 'slider',
+                show: true,
+                height: 20,
+                bottom: 10,
+                start: 0,
+                end: 100,
+                zoomLock: true,
+                brushSelect: false,
+                handleSize: '100%',
+                handleStyle: { color: '#6366f1', borderColor: '#6366f1' },
+                textStyle: { color: '#71717a' },
+                borderColor: 'transparent',
+                backgroundColor: '#18181b',
+                fillerColor: 'rgba(99, 102, 241, 0.3)',
+                labelFormatter: function (value) {
+                    const d = new Date(value);
+                    return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+                }
+            }
+        ]
     };
     mainChart.setOption(option);
 }
