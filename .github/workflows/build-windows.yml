@@ -28,47 +28,57 @@ jobs:
         pip install pyinstaller
     
     - name: Build EXE with PyInstaller
+      shell: pwsh
       run: |
-        pyinstaller --noconfirm --onedir --windowed --name "抖音热搜监控" ^
-          --add-data "frontend;frontend" ^
-          --add-data "backend;backend" ^
-          --add-data "data;data" ^
-          --hidden-import "flask" ^
-          --hidden-import "flask_cors" ^
-          --hidden-import "apscheduler" ^
-          --hidden-import "apscheduler.schedulers.background" ^
-          --hidden-import "apscheduler.triggers.interval" ^
-          --hidden-import "requests" ^
-          --hidden-import "bs4" ^
-          --hidden-import "lxml" ^
-          --collect-submodules "backend" ^
+        pyinstaller --noconfirm --onedir --console `
+          --name "DouyinMonitor" `
+          --add-data "frontend;frontend" `
+          --add-data "backend;backend" `
+          --add-data "data;data" `
+          --hidden-import "flask" `
+          --hidden-import "flask_cors" `
+          --hidden-import "apscheduler" `
+          --hidden-import "apscheduler.schedulers.background" `
+          --hidden-import "apscheduler.triggers.interval" `
+          --hidden-import "requests" `
+          --hidden-import "bs4" `
+          --hidden-import "lxml" `
+          --collect-submodules "backend" `
           run.py
-      shell: cmd
     
     - name: Create launcher script
+      shell: pwsh
       run: |
-        echo @echo off > "dist/抖音热搜监控/启动.bat"
-        echo cd /d "%%~dp0" >> "dist/抖音热搜监控/启动.bat"
-        echo start "" "抖音热搜监控.exe" >> "dist/抖音热搜监控/启动.bat"
-      shell: cmd
+        $content = @"
+@echo off
+chcp 65001 >nul
+cd /d "%~dp0"
+start "" "DouyinMonitor.exe"
+"@
+        $content | Out-File -FilePath "dist/DouyinMonitor/启动.bat" -Encoding utf8
+    
+    - name: Rename folder for release
+      shell: pwsh
+      run: |
+        Rename-Item -Path "dist/DouyinMonitor" -NewName "抖音热搜监控"
     
     - name: Compress release
+      shell: pwsh
       run: |
-        Compress-Archive -Path "dist/抖音热搜监控" -DestinationPath "抖音热搜监控-Windows.zip"
-      shell: powershell
+        Compress-Archive -Path "dist/抖音热搜监控" -DestinationPath "DouyinMonitor-Windows.zip" -Force
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: 抖音热搜监控-Windows
-        path: 抖音热搜监控-Windows.zip
+        name: DouyinMonitor-Windows
+        path: DouyinMonitor-Windows.zip
         retention-days: 30
     
     - name: Release (on tag)
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: 抖音热搜监控-Windows.zip
+        files: DouyinMonitor-Windows.zip
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
