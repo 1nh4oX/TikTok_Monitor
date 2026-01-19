@@ -430,6 +430,36 @@ body {
     align-items: center;
 }
 
+.time-range-selector {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-hover);
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.time-btn {
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.time-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.time-btn.active {
+    background: var(--accent-primary);
+    color: white;
+}
+
 .drop-placeholder {
     flex: 1;
     display: flex;

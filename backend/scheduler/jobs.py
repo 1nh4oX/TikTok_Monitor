@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scraper.unified_scraper import get_unified_scraper
 from models.database import save_hot_list, init_database
-from settings_manager import load_settings, save_record_snapshot
+from settings_manager import load_settings, save_record_snapshot, cleanup_old_records
 
 
 # 全局调度器实例
@@ -46,6 +46,9 @@ def scrape_job():
             stats = unified_scraper.get_stats()
             print(f"[统计] API成功率: {stats['api']['success_rate']:.1f}%, "
                   f"HTML成功率: {stats['html']['success_rate']:.1f}%")
+            
+            # 清理过期记录
+            cleanup_old_records()
         else:
             error_msg = result.get('error', '未知错误')
             print(f"[任务警告] 抓取失败: {error_msg}")

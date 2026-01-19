@@ -178,3 +178,66 @@ def get_word_history(word: str, days: int = 7) -> list:
                     break
     
     return sorted(history, key=lambda x: x['timestamp'])
+
+
+def cleanup_old_records():
+    """
+    清理过期的历史记录
+    
+    根据 max_history_days 设置删除旧的 JSON 记录和数据库快照
+    """
+    from datetime import datetime, timedelta
+    import shutil
+    
+    settings = load_settings()
+    max_days = settings.get('max_history_days', 7)
+    cutoff_date = (datetime.now() - timedelta(days=max_days)).strftime('%Y-%m-%d')
+    
+    deleted_count = 0
+    
+    # 1. 清理 JSON 记录文件
+    if os.path.exists(RECORDS_DIR):
+        for date_folder in os.listdir(RECORDS_DIR):
+            folder_path = os.path.join(RECORDS_DIR, date_folder)
+            if os.path.isdir(folder_path) and date_folder < cutoff_date:
+                try:
+                    shutil.rmtree(folder_path)
+                    deleted_count += 1
+                    print(f"[清理] 删除过期记录: {date_folder}")
+                except Exception as e:
+                    print(f"[清理] 删除失败 {date_folder}: {e}")
+    
+    # 2. 清理数据库中的旧快照
+    try:
+        from models.database import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 删除超过 max_days 天的快照
+            cursor.execute('''
+                DELETE FROM hot_items 
+                WHERE snapshot_id IN (
+                    SELECT id FROM hot_snapshots 
+                    WHERE captured_at < datetime('now', '-' || ? || ' days')
+                )
+            ''', (max_days,))
+            
+            cursor.execute('''
+                DELETE FROM hot_snapshots 
+                WHERE captured_at < datetime('now', '-' || ? || ' days')
+            ''', (max_days,))
+            
+            deleted_snapshots = cursor.rowcount
+            conn.commit()
+            
+            if deleted_snapshots > 0:
+                print(f"[清理] 数据库删除了 {deleted_snapshots} 个过期快照")
+                
+    except Exception as e:
+        print(f"[清理] 数据库清理失败: {e}")
+    
+    if deleted_count > 0:
+        print(f"[清理] 完成，共删除 {deleted_count} 个过期日期文件夹")
+    
+    return deleted_count

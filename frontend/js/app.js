@@ -8,6 +8,7 @@ let compareWords = [];
 let mainChart = null;
 let refreshTimer = null;
 let currentSettings = {};
+let selectedHours = 1; // 默认显示 1 小时
 
 // Colors
 const PALETTE = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#06b6d4', '#8b5cf6'];
@@ -63,6 +64,18 @@ function setupEventListeners() {
 
     els.btnRefresh.addEventListener('click', manualRefresh);
     if (els.btnSaveSettings) els.btnSaveSettings.addEventListener('click', saveSettings);
+
+    // 时间范围选择器
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedHours = parseInt(btn.dataset.hours);
+            if (compareWords.length > 0) {
+                updateChart();
+            }
+        });
+    });
 }
 
 function setupDragAndDrop() {
@@ -308,7 +321,7 @@ async function updateChart() {
     for (const word of compareWords) {
         try {
             let data = [];
-            const r1 = await fetch(`${API_BASE}/api/trend/${encodeURIComponent(word)}`);
+            const r1 = await fetch(`${API_BASE}/api/trend/${encodeURIComponent(word)}?hours=${selectedHours}`);
             const j1 = await r1.json();
 
             if (j1.success && j1.trend.length > 0) {
@@ -386,7 +399,33 @@ function renderEChart(labels, series) {
             splitLine: { lineStyle: { color: '#27272a' } },
             axisLabel: { color: '#71717a', formatter: compactNumber }
         },
-        series: series
+        series: series,
+        dataZoom: [
+            {
+                type: 'inside',
+                start: 0,
+                end: 100,
+                zoomLock: false
+            },
+            {
+                type: 'slider',
+                show: true,
+                height: 20,
+                bottom: 0,
+                start: 0,
+                end: 100,
+                handleSize: '80%',
+                handleStyle: { color: '#6366f1' },
+                textStyle: { color: '#71717a' },
+                borderColor: 'transparent',
+                backgroundColor: '#18181b',
+                fillerColor: 'rgba(99, 102, 241, 0.2)',
+                dataBackground: {
+                    lineStyle: { color: '#3f3f46' },
+                    areaStyle: { color: '#27272a' }
+                }
+            }
+        ]
     };
     mainChart.setOption(option);
 }
