@@ -11,21 +11,34 @@ import sys
 # ============================================================
 # 基础路径配置 (兼容 PyInstaller 打包)
 # ============================================================
-def get_base_dir():
-    """获取基础路径，兼容 PyInstaller 打包后的情况"""
+def get_resource_dir():
+    """获取静态资源路径（frontend 等），用于读取打包的资源文件"""
     if getattr(sys, 'frozen', False):
-        # PyInstaller 打包后运行
-        # sys._MEIPASS 指向资源文件所在目录（_internal 目录）
+        # PyInstaller 打包后，资源文件在 _internal 目录
         if hasattr(sys, '_MEIPASS'):
             return sys._MEIPASS
-        # 备用方案：使用 exe 所在目录
         return os.path.dirname(sys.executable)
     else:
         # 普通 Python 运行
         return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-BASE_DIR = get_base_dir()
-DATA_DIR = os.path.join(BASE_DIR, 'data')
+def get_data_dir():
+    """获取数据存储路径（database、records 等），用于可写数据"""
+    if getattr(sys, 'frozen', False):
+        # PyInstaller 打包后，数据保存在 exe 所在目录的 data 文件夹
+        exe_dir = os.path.dirname(sys.executable)
+        data_dir = os.path.join(exe_dir, 'data')
+        # 确保目录存在
+        os.makedirs(data_dir, exist_ok=True)
+        return data_dir
+    else:
+        # 普通 Python 运行
+        return os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+
+# BASE_DIR: 静态资源目录（frontend）
+BASE_DIR = get_resource_dir()
+# DATA_DIR: 可写数据目录（database、records）
+DATA_DIR = get_data_dir()
 
 # 数据库配置
 DATABASE_PATH = os.path.join(DATA_DIR, 'douyin.db')
