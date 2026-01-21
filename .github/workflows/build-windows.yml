@@ -32,7 +32,7 @@ jobs:
     
     - name: Build EXE with PyInstaller
       run: |
-        pyinstaller --noconfirm --onedir --console --name "DouyinMonitor" --add-data "frontend;frontend" --add-data "backend;backend" --add-data "data;data" --hidden-import "flask" --hidden-import "flask_cors" --hidden-import "apscheduler" --hidden-import "apscheduler.schedulers.background" --hidden-import "apscheduler.triggers.interval" --hidden-import "requests" --hidden-import "bs4" --hidden-import "lxml" --collect-submodules "backend" run.py
+        pyinstaller --noconfirm --onedir --console --name "DouyinMonitor" --add-data "frontend;frontend" --add-data "backend;backend" --add-data "data;data" --hidden-import "flask" --hidden-import "flask_cors" --hidden-import "apscheduler" --hidden-import "apscheduler.schedulers.background" --hidden-import "apscheduler.triggers.interval" --hidden-import "requests" --hidden-import "bs4" --hidden-import "lxml" --hidden-import "sqlite3" --hidden-import "_sqlite3" --collect-all "sqlite3" --collect-submodules "backend" run.py
     
     - name: Create launcher script
       shell: cmd
