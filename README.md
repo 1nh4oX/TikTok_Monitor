@@ -1,56 +1,56 @@
-# 抖音热搜监控系统 (Douyin Hot Monitor Pro)
+# TikTok Hot Search Monitor (Douyin Hot Monitor Pro)
 
-实时监控抖音热门搜索榜单，分析热点趋势的现代化仪表盘。
+A modern dashboard that monitors TikTok (Douyin) hot search lists in real-time and analyzes trending topics.
 
-## 📦 Windows 用户快速下载（推荐）
+## 📦 Quick Download for Windows Users (Recommended)
 
-**无需安装 Python！** 直接下载运行：
+**No Python installation required!** Simply download and run:
 
-1. 前往 [**Releases 页面**](../../releases/latest)
-2. 下载 `抖音热搜监控-Windows.zip`
-3. 解压后双击 `启动.bat` 即可
-
----
-## 🚀 一键启动（推荐）
-
-### Windows 用户
-1. 确保已安装 [Python](https://www.python.org/downloads/)（安装时勾选 "Add to PATH"）
-2. **双击 `启动.bat`** 
-3. 等待自动安装完成，浏览器会自动打开
-
-### Mac 用户
-1. 确保已安装 Python（终端输入 `python3 --version` 检查）
-2. **双击 `启动.command`**
-3. 如提示"无法验证开发者"，右键选择"打开"
-4. 等待自动安装完成，浏览器会自动打开
-
-> 💡 首次启动会自动创建虚拟环境并安装依赖，可能需要 1-2 分钟
+1. Go to the [**Releases Page**](../../releases/latest)
+2. Download `DouyinMonitor-Windows.zip`
+3. Unzip and double-click `Start.bat`
 
 ---
+## 🚀 One-Click Start (Recommended)
 
-## ✨ 功能特性
+### Windows Users
+1. Ensure [Python](https://www.python.org/downloads/) is installed (Make sure to check "Add to PATH" during installation)
+2. **Double-click `Start.bat`**
+3. Wait for the automatic installation to complete; the browser will open automatically.
 
-- 🔥 **实时热榜** - 自动抓取抖音 Top 50 热搜
-- 📊 **趋势对比** - 点击/拖拽热词进行对比分析
-- 🚀 **急速上升** - 实时检测排名飙升的热点
-- 🌙 **深色主题** - 现代化 Premium UI 设计
+### Mac Users
+1. Ensure Python is installed (Type `python3 --version` in the terminal to check)
+2. **Double-click `Start.command`**
+3. If prompted "Cannot verify developer", right-click and select "Open"
+4. Wait for the automatic installation to complete; the browser will open automatically.
 
-## 📖 使用方法
+> 💡 The first launch will automatically create a virtual environment and install dependencies, which may take 1-2 minutes.
 
-- **点击热搜词** → 快速查看趋势
-- **拖拽到工作台** → 多词对比
-- **点击 + 按钮** → 添加到对比列表
+---
 
-## ⚠️ 常见问题
+## ✨ Features
 
-**Q: 提示"未检测到 Python"**
-A: 请安装 Python 3.8+，Windows 安装时务必勾选 "Add Python to PATH"
+- 🔥 **Real-time Hot List** - Automatically scrapes TikTok Top 50 hot searches
+- 📊 **Trend Comparison** - Click or drag hot words to compare trends
+- 🚀 **Rapid Rising** - Real-time detection of skyrocketing ranking topics
+- 🌙 **Dark Theme** - Modern, Premium UI design
 
-**Q: Mac 提示"无法验证开发者"**
-A: 右键点击 `启动.command`，选择"打开"，然后点击"打开"按钮
+## 📖 How to Use
 
-**Q: 急速上升为空**
-A: 正常现象，需要等待热榜真正更新后才会显示变化
+- **Click Hot Word** → Quickly view trends
+- **Drag to Workbench** → Compare multiple words
+- **Click + Button** → Add to comparison list
+
+## ⚠️ FAQ
+
+**Q: Prompt "Python not detected"**
+A: Please install Python 3.8+. For Windows, ensure you check "Add Python to PATH" during installation.
+
+**Q: Mac prompts "Cannot verify developer"**
+A: Right-click `Start.command`, select "Open", and then click the "Open" button.
+
+**Q: "Rapid Rising" list is empty**
+A: This is normal; it requires the hot list to actually update before changes are detected and displayed.
 
 ## 📜 License
 
